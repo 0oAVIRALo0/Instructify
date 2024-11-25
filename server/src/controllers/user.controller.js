@@ -206,6 +206,42 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
   .json(new responseHandler(200, user, "Account details updated successfully"))
 });
 
+const uploadVideo = asyncHandler(async (req, res) => { 
+  console.log("uploadVideo function called"); // Check if this is logged
+
+  const { title, description } = req.body;
+
+  console.log("Request Body:", req.body); // Debugging the request payload
+  console.log("Uploaded File:", req.file); // Debugging uploaded file
+
+  if (!req.file) {
+    console.log("No file uploaded");
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  if ([title, description].some((field) => field?.trim() === "")) {
+    console.log("Missing fields");
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const videoUrl = req.file.path;
+
+  const video = await Video.create({
+    title,
+    description,
+    videoUrl,
+    user: req.user._id,
+  });
+
+  console.log("Video created:", video);
+
+  return res.status(201).json({
+    status: 200,
+    data: video,
+    message: "Video uploaded successfully",
+  });
+});
+
 export { 
   registerUser,
   loginUser,
@@ -214,4 +250,5 @@ export {
   changeCurrentPassword,
   getCurrentUser,
   updateAccountDetails,
+  uploadVideo,
 }
