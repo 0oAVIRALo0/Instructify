@@ -1,9 +1,9 @@
 import { responseHandler, errorHandler, asyncHandler, generateTokens } from "../utils/index.js";
-import { User } from "../models/index.js";
+import { User, Course } from "../models/index.js";
 import jwt from "jsonwebtoken";
 
 const registerUser = asyncHandler(async (req, res) => { 
-  const {fullName, email, username, role, password } = req.body
+  const { fullName, email, username, password } = req.body
 
   if (
     [fullName, email, username, password].some((field) => field?.trim() === "")
@@ -23,9 +23,12 @@ const registerUser = asyncHandler(async (req, res) => {
     fullName,
     email,
     username: username.toLowerCase(),
-    role,
     password
   })
+
+  const { accessToken, refreshToken } = await generateTokens(user._id)
+  
+  user.refreshToken = refreshToken
 
   const createdUser = await User.findById(user._id).select("-password -refreshToken")
 
@@ -33,10 +36,26 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new errorHandler(500, "Something went wrong while registering the user")
   }
 
-  return res.status(201).json(
-    new responseHandler(200, createdUser, "User registered Successfully")
-  )
-});
+  const options = {
+    httpOnly: true,
+    secure: true
+  }
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new responseHandler(
+        200,
+        {
+          user: createdUser, accessToken, refreshToken
+        },
+        "User registered Successfully"
+      )
+    )
+  }
+);
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body
@@ -206,6 +225,56 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
   .json(new responseHandler(200, user, "Account details updated successfully"))
 });
 
+const addCourse = asyncHandler(async (req, res) => { 
+  const { title, description, price } = req.body;
+
+  console.log("Request Body:", req.body);
+
+  if ([title, description, price].some((field) => field?.trim() === "")) {
+    console.log("Missing fields");
+    throw new errorHandler(400, "All fields are required");
+  }
+
+  const existingCourse = await Course.findOne({
+    title: title,
+  });
+
+  if (existingCourse) {
+    throw new errorHandler(409, "Course already exists");
+  }
+
+  const course = await Course.create({
+    title,
+    description,
+    price,
+    instructor: req.user._id,
+  });
+
+  return res.status(201).json(new responseHandler(200, course, "Course created successfully"));
+});
+
+const getCourses = asyncHandler(async (req, res) => { 
+  const courses = await Course.find({
+    instructor: req.user._id,
+  });
+
+  if (!courses) {
+    throw new errorHandler(404, "Courses not found");
+  }
+
+  return res.status(200).json(new responseHandler(200, courses, "Course fetched successfully"));
+});
+
+const getAllCourses = asyncHandler(async (req, res) => { 
+  const courses = await Course.find();
+
+  if (!courses) {
+    throw new errorHandler(404, "Courses not found");
+  }
+
+  return res.status(200).json(new responseHandler(200, courses, "Courses fetched successfully"));
+});
+
 const uploadVideo = asyncHandler(async (req, res) => { 
   console.log("uploadVideo function called"); // Check if this is logged
 
@@ -242,6 +311,99 @@ const uploadVideo = asyncHandler(async (req, res) => {
   });
 });
 
+const enrollInCourse = asyncHandler(async (req, res) => { 
+  const { courseId } = req.params;
+
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    throw new errorHandler(404, "Course not found");
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new errorHandler(404, "User not found");
+  }
+
+  if (user.coursesEnrolled.includes(courseId)) {
+    throw new errorHandler(400, "Already enrolled in course");
+  }
+
+  user.coursesEnrolled.push(courseId);
+  await user.save();
+
+  if (!course.studentsEnrolled.includes(user._id)) {
+    course.students.push(user._id);
+    await course.save();
+  }
+
+  return res.status(200).json(new responseHandler(200, {}, "Enrolled in course successfully"));
+});
+
+const getEnrolledCourses = asyncHandler(async (req, res) => { 
+  const user = await User.findById(req.user._id).populate("coursesEnrolled");
+
+  if (!user) {
+    throw new errorHandler(404, "User not found");
+  }
+
+  return res.status(200).json(new responseHandler(200, user.coursesEnrolled, "Enrolled courses fetched successfully"));
+});
+
+const unenrollInCourse = asyncHandler(async (req, res) => { 
+  console.log(req.params);
+  const { courseId } = req.params;
+
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    throw new errorHandler(404, "Course not found");
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    throw new errorHandler(404, "User not found");
+  }
+
+  if (!user.coursesEnrolled.includes(courseId)) {
+    throw new errorHandler(400, "Not enrolled in course");
+  }
+
+  user.coursesEnrolled = user.coursesEnrolled.filter(
+    (course) => course.toString() !== courseId.toString()
+  );
+  await user.save();
+
+  return res.status(200).json(new responseHandler(200, {}, "Unenrolled in course successfully"));
+});
+
+const applyRole = asyncHandler(async (req, res) => {
+  console.log("Request Body:", req.body);
+  const { role } = req.body;
+
+  if (!role) {
+    throw new errorHandler(400, "Role is required");
+  }
+
+  const validRoles = ['student', 'instructor'];
+  if (!validRoles.includes(role.toLowerCase())) {
+    throw new errorHandler(400, "Invalid role provided");
+  }
+
+  const fetchedUser = await User.findById(req.user._id);
+
+  if (!fetchedUser) {
+    throw new errorHandler(404, "User not found");
+  }
+
+  fetchedUser.role = role;
+  await fetchedUser.save();
+
+  return res.status(200).json(new responseHandler(200, fetchedUser, "Role applied successfully"));
+});
+
 export { 
   registerUser,
   loginUser,
@@ -251,4 +413,11 @@ export {
   getCurrentUser,
   updateAccountDetails,
   uploadVideo,
+  addCourse,
+  getCourses,
+  getAllCourses,
+  enrollInCourse,
+  getEnrolledCourses,
+  unenrollInCourse,
+  applyRole
 }

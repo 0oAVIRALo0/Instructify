@@ -26,10 +26,9 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    required: true,
     lowercase: true,
-    enum: ["student", "instructor", "admin"],
-    default: "student",
+    enum: ["student", "instructor"],
+    required: false,
   },
   avatar: {
     type: String, // aws or cloudinary
@@ -39,7 +38,6 @@ const userSchema = new Schema({
     type: String,
     required: [true, "Password is required"],
   },
-
   // if the user is an instructor
   coursesTaught: [
     {

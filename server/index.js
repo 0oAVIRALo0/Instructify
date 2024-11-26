@@ -1,3 +1,11 @@
+// Schema Validation using zod
+// Escaping HTML and CSS Protection
+// ORM and SQL Injection
+// Limiting the payload size
+// Authentication Limits
+// HTTP response headers using helmet
+// Scaling Nodejs server
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -8,15 +16,14 @@ import { connectDB } from './src/db/index.js';
 
 const app = express();
 app.use(express.json());
-app.use(cors())
+app.use(cors(
+  {
+    origin: 'http://localhost:5173',
+  }
+))
 app.use(cookieParser());
 
 const PORT = process.env.PORT || 8000;
-
-// Checks if the server is up and running
-app.get('/health', (req, res) => { 
-  res.send(`Server is up and running for ${process.uptime()} seconds`);
-})
 
 // Routes import
 import userRouter from './src/routes/user.router.js';
