@@ -71,8 +71,8 @@ const UserProfile = () => {
           width="full"
           customFunc={() => {
             logout(); 
-            navigate("/login"); 
           }}
+          to="/login"
         />
       </div>
     </div>

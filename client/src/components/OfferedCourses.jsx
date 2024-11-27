@@ -3,6 +3,7 @@ import axios from "../services/api";
 import request from "../services/requests";
 import { LoremIpsum } from "lorem-ipsum"; 
 import banner from '../data/banner.jpg'; 
+import Card from "./Card";
 
 function OfferedCourses() {
   const [courses, setCourses] = useState([]);
@@ -24,11 +25,13 @@ function OfferedCourses() {
 
   useEffect(() => {
     const fetchCourses = async () => {
+      console.log("Access token:", localStorage.getItem("accessToken"));
       try {
         const response = await axios.get(request.getAllCourses, {
           headers: {
-            Authorization: "Bearer " + localStorage.getItem("token"),
+            Authorization: "Bearer " + localStorage.getItem("accessToken"),
           },
+          withCredentials: true,
         });
 
         if (response.status === 200) {
@@ -43,13 +46,15 @@ function OfferedCourses() {
   }, []);
 
   const enrollInCourse = async (courseId) => {
+    console.log("Enrolling in course:", courseId);
     try {
       const response = await axios.post(`${request.enrollInCourse}/${courseId}`,
         {},
         {
           headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
           },
+          withCredentials: true,
         }
       );
 
@@ -96,35 +101,18 @@ function OfferedCourses() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 m-3">
         {courses.map((course) => (
-          <div
+          <Card
             key={course._id}
-            className="bg-white dark:bg-secondary-dark-bg p-6 rounded-lg shadow-md border border-gray-300"
-          >
-            <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              {course.title}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              {course.description}
-            </p>
-            <p className="text-gray-800 dark:text-gray-200 font-semibold mt-2">
-              Price: ${course.price}
-            </p>
-            <div className="flex gap-4 mt-4">
-              {/* Open the View Details modal */}
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                onClick={() => openModal(course)}
-              >
-                View Details
-              </button>
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                onClick={() => enrollInCourse(course._id)}
-              >
-                Enroll
-              </button>
-            </div>
-          </div>
+            course={course}
+            primaryAction={{
+              label: "View Details",
+              onClick: () => openModal(course),
+            }}
+            lastAction={{
+              label: "Enroll",
+              onClick: () => enrollInCourse(course._id),
+            }}
+          />
         ))}
       </div>
 

@@ -5,7 +5,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import { FiSettings } from "react-icons/fi";
 
 import { Navbar, Sidebar, ThemeSettings, AddCourse, OfferedCourses, EnrolledCourses } from "./components";
-import { Explore, Courses, Calendar, LogIn, SignIn, Error, Role } from "./pages";
+import { Explore, MyCourses, Calendar, LogIn, SignIn, Error, Role } from "./pages";
 
 import { useStateContext } from "./contexts/ContextProvider";
 
@@ -80,7 +80,7 @@ const App = () => {
             {themeSettings && <ThemeSettings />}
 
             <Routes>
-              <Route path="/mycourses" element={<Courses />} />
+              <Route path="/mycourses" element={<MyCourses />} />
               <Route path="/addcourse" element={<AddCourse />} />
               <Route path="/offeredcourses" element={<OfferedCourses />} />
               <Route path="/enrolledcourses" element={<EnrolledCourses />} />

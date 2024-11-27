@@ -29,13 +29,14 @@ export const ContextProvider = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("accessToken");
         if (token) {
           setIsLoggedIn(true);
           const response = await axios.get(request.getCurreantUser, {
             headers: {
-              Authorization: "Bearer " + localStorage.getItem("token"),
+              Authorization: "Bearer " + localStorage.getItem("accessToken"),
             },
+            withCredentials: true,
           });
           // console.log("User details:", response.data.data);
           const { fullName, username, email, role } = response.data.data;
@@ -66,10 +67,28 @@ export const ContextProvider = ({
     }));
   };
 
-  const logout = () => {
-    console.log("LogOut button is pressed");
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
+  const logout = async () => {
+    try {
+      const response = await axios.post(request.logout, {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        withCredentials: true,
+      })
+
+      console.log("Logout response:", response);
+
+      if (response.status === 200) {
+        console.log("Logged out successfull")
+        localStorage.removeItem("accessToken");
+        setIsLoggedIn(false);
+        setUserData({});
+      } else {
+        console.error("Error logging out:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   const updateAuthStatus = (status) => {

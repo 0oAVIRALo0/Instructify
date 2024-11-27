@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 const Button = ({icon,bgColor,color,bgHoverColor,size,text,borderRadius,width,customFunc,to}) => {
   const navigate = useNavigate(); 
   const handleClick = () => {
-    if (to) {
-      navigate(to); 
-    }
     if (customFunc) {
       customFunc();
+    }
+    if (to) {
+      navigate(to); 
     }
   };
 

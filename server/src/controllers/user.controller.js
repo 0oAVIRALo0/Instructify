@@ -1,9 +1,11 @@
-import { responseHandler, errorHandler, asyncHandler, generateTokens } from "../utils/index.js";
-import { User, Course } from "../models/index.js";
+import { responseHandler, errorHandler, asyncHandler, generateTokens, options } from "../utils/index.js";
+import { User, Course, Video } from "../models/index.js";
 import jwt from "jsonwebtoken";
+import { registerUserValidation, loginUserValidation, addCourseValidation } from "../validation/index.js";
 
 const registerUser = asyncHandler(async (req, res) => { 
-  const { fullName, email, username, password } = req.body
+  const validatedData = registerUserValidation.parse(req.body);
+  const { fullName, email, username, password } = validatedData;
 
   if (
     [fullName, email, username, password].some((field) => field?.trim() === "")
@@ -36,11 +38,6 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new errorHandler(500, "Something went wrong while registering the user")
   }
 
-  const options = {
-    httpOnly: true,
-    secure: true
-  }
-
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
@@ -58,7 +55,8 @@ const registerUser = asyncHandler(async (req, res) => {
 );
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, username, password } = req.body
+  const validatedData = loginUserValidation.parse(req.body)
+  const { username, email, password } = validatedData
 
   if (!username && !email) {
     throw new errorHandler(400, "username or email is required")
@@ -81,11 +79,6 @@ const loginUser = asyncHandler(async (req, res) => {
   const {accessToken, refreshToken} = await generateTokens(user._id)
 
   const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
-
-  const options = {
-    httpOnly: true,
-    secure: true
-  }
 
   return res
   .status(200)
@@ -114,11 +107,6 @@ const logoutUser = asyncHandler(async(req, res) => {
       new: true
     }
   )
-
-  const options = {
-    httpOnly: true,
-    secure: true
-  }
 
   return res
     .status(200)
@@ -149,11 +137,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     if (incomingRefreshToken !== user?.refreshToken) {
       throw new errorHandler(401, "Refresh token is expired or used")
         
-    }
-
-    const options = {
-      httpOnly: true,
-      secure: true
     }
 
     const {accessToken, newRefreshToken} = await generateAccessAndRefereshTokens(user._id)
@@ -226,7 +209,8 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
 });
 
 const addCourse = asyncHandler(async (req, res) => { 
-  const { title, description, price } = req.body;
+  const validatedData = addCourseValidation.parse(req.body);
+  const { title, description, price } = validatedData;
 
   console.log("Request Body:", req.body);
 
@@ -276,8 +260,6 @@ const getAllCourses = asyncHandler(async (req, res) => {
 });
 
 const uploadVideo = asyncHandler(async (req, res) => { 
-  console.log("uploadVideo function called"); // Check if this is logged
-
   const { title, description } = req.body;
 
   console.log("Request Body:", req.body); // Debugging the request payload
@@ -293,12 +275,12 @@ const uploadVideo = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  const videoUrl = req.file.path;
+  // const videoUrl = req.file.path;
 
   const video = await Video.create({
     title,
     description,
-    videoUrl,
+    // videoUrl,
     user: req.user._id,
   });
 
@@ -352,7 +334,7 @@ const getEnrolledCourses = asyncHandler(async (req, res) => {
 });
 
 const unenrollInCourse = asyncHandler(async (req, res) => { 
-  console.log(req.params);
+  // console.log(req.params);
   const { courseId } = req.params;
 
   const course = await Course.findById(courseId);

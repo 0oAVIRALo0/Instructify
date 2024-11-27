@@ -20,8 +20,9 @@ const Role = () => {
       const response = await axios.put(request.applyRole, formData, {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
         },
+        withCredentials: true,
       })
 
       if (response.status === 200) {

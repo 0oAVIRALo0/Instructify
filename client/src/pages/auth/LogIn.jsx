@@ -38,7 +38,7 @@ function LogIn() {
 
       if (response.status === 200) {
         // Set the token and user data in localStorage
-        localStorage.setItem("token", response.data.data.accessToken);
+        localStorage.setItem("accessToken", response.data.data.accessToken);
         updateAuthStatus(true);
         
         // Redirect based on the role

@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from "react";
 import axios from "../services/api";
 import request from "../services/requests";
-import banner from '../data/banner.jpg'; // Ensure the path is correct`
+import banner from '../data/banner.jpg'; 
+import Card from "./Card";
+import { loremIpsum } from "lorem-ipsum";
 
 function EnrolledCourses() {
   const [courses, setCourses] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [dynamicDescription, setDynamicDescription] = useState(""); 
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const response = await axios.get(request.getEnrolledCourses, {
           headers: {
-            Authorization: "Bearer " + localStorage.getItem("token"),
+            Authorization: "Bearer " + localStorage.getItem("accessToken"),
           },
+          withCredentials: true,
         });
 
         if (response.status === 200) {
@@ -35,8 +41,9 @@ function EnrolledCourses() {
       const response = await axios.delete(`${request.unenrollInCourse}/${courseId}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
+          withCredentials: true,
         }
       );
 
@@ -51,6 +58,25 @@ function EnrolledCourses() {
         alert("Please log in to unenroll from the course!");
       }
     }
+  };
+
+  const generateLoremIpsum = (paragraphs = 2) => {
+    return loremIpsum({
+      count: paragraphs, 
+      units: "paragraphs",
+      format: "plain",
+    });
+  };
+
+  const openModal = (course) => {
+    setSelectedCourse(course);
+    setDynamicDescription(generateLoremIpsum(1)); 
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedCourse(null);
   };
 
   return (
@@ -73,36 +99,52 @@ function EnrolledCourses() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 m-3">
         {courses.map((course) => (
-          <div
+          <Card
             key={course._id}
-            className="bg-white dark:bg-secondary-dark-bg p-6 rounded-lg shadow-md border border-gray-300"
+            course={course}
+            primaryAction={{
+              label: "View Details",
+              onClick: () => openModal(course),
+            }}
+            tertiaryAction={{
+              label: "Unenroll",
+              onClick: () => unenrollInCourse(course._id),
+            }}
+          />
+        ))}
+      </div>
+
+      {isModalOpen && selectedCourse && (
+        <div
+          className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50"
+          onClick={closeModal} 
+        >
+          <div
+            className="bg-white dark:bg-secondary-dark-bg rounded-lg p-6 w-96"
+            onClick={(e) => e.stopPropagation()} 
           >
-            <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              {course.title}
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-white">
+              {selectedCourse.title}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              {course.description}
+              {selectedCourse.description}
             </p>
-            <p className="text-gray-800 dark:text-gray-200 font-semibold mt-2">
-              Price: ${course.price}
-            </p>
-            <div className="flex gap-4 mt-4">
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                onClick={() => console.log(`Course ID: ${course._id}`)}
-              >
-                Watch
-              </button>
+            <div className="mt-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                {dynamicDescription}
+              </p>
+            </div>
+            <div className="flex justify-end mt-4">
               <button
                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                onClick={() => unenrollInCourse(course._id)}
+                onClick={closeModal}
               >
-                Unenroll
+                Close
               </button>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

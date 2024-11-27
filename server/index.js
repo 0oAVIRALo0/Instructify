@@ -1,8 +1,8 @@
-// Schema Validation using zod
+// Rate limiting
+// Schema Validation
 // Escaping HTML and CSS Protection
 // ORM and SQL Injection
 // Limiting the payload size
-// Authentication Limits
 // HTTP response headers using helmet
 // Scaling Nodejs server
 
@@ -12,15 +12,20 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { connectDB } from './src/db/index.js';
 
 const app = express();
+app.use(helmet());
 app.use(express.json());
-app.use(cors(
-  {
-    origin: 'http://localhost:5173',
-  }
-))
+app.use(express.urlencoded({ extended: false }));
+const corsOptions = {
+  origin: 'http://localhost:5173',  
+  methods: 'GET,POST,PUT,DELETE',  
+  allowedHeaders: 'Content-Type, Authorization', 
+  credentials: true,  
+};
+app.use(cors(corsOptions));
 app.use(cookieParser());
 
 const PORT = process.env.PORT || 8000;

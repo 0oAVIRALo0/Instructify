@@ -3,8 +3,10 @@ import axios from "../services/api";
 import request from "../services/requests";
 import banner from "../data/banner.jpg"; 
 import { loremIpsum } from "lorem-ipsum"; 
+import { Card } from "../components";
 
-function Courses() {
+
+function MyCourses() {
   const [courses, setCourses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false); 
@@ -17,8 +19,9 @@ function Courses() {
       try {
         const response = await axios.get(request.getCourses, {
           headers: {
-            Authorization: "Bearer " + localStorage.getItem("token"),
+            Authorization: "Bearer " + localStorage.getItem("accessToken"),
           },
+          withCredentials: true,
         });
 
         if (response.status === 200) {
@@ -63,28 +66,33 @@ function Courses() {
   };
 
   const handleFileChange = (event) => {
+    console.log("File: ", event.target.files[0]);
     setSelectedFile(event.target.files[0]);
   };
 
   const handleFileUpload = async () => {
+    console.log("Uploading file to: ", request.uploadVideo);
     if (!selectedFile) {
       alert("Please select a file to upload.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    formData.append("video", selectedFile);
     formData.append("courseId", selectedCourse._id);
+    formData.append("title", selectedCourse.title);
+    formData.append("description", selectedCourse.description);
 
     try {
       const response = await axios.post(request.uploadVideo, formData, {
         headers: {
-          Authorization: "Bearer " + localStorage.getItem("token"),
+          Authorization: "Bearer " + localStorage.getItem("accessToken"),
           "Content-Type": "multipart/form-data",
         },
+        withCredentials: true,
       });
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         alert("Video uploaded successfully!");
         closeUploadModal();
       }
@@ -114,36 +122,16 @@ function Courses() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 m-3">
         {courses.map((course) => (
-          <div
+          <Card
             key={course._id}
-            className="bg-white dark:bg-secondary-dark-bg p-6 rounded-lg shadow-md border border-gray-300"
-          >
-            <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-              {course.title}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              {course.description}
-            </p>
-            <p className="text-gray-800 dark:text-gray-200 font-semibold mt-2">
-              Price: ${course.price}
-            </p>
-            <div className="flex gap-4 mt-4">
-
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                onClick={() => openModal(course)} 
-              >
-                View Details
-              </button>
-
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                onClick={() => openUploadModal(course)} 
-              >
-                Upload Video
-              </button>
-            </div>
-          </div>
+            course={course}
+            primaryAction={ 
+              { label: "View Details", onClick: () => openModal(course) }
+            }
+            secondaryAction={ 
+              { label: "Upload Video", onClick: () => openUploadModal(course) }
+            }
+          />
         ))}
       </div>
 
@@ -218,4 +206,4 @@ function Courses() {
   );
 }
 
-export default Courses;
+export default MyCourses;

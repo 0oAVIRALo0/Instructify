@@ -30,8 +30,9 @@ function NewCourse() {
       const response = await axios.post(request.addCourse, formData, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
+          Authorization: "Bearer " + localStorage.getItem("accessToken"),
         },
+        withCredentials: true,
       });
 
       if (response.status === 2001) {

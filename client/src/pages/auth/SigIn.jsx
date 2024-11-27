@@ -54,10 +54,7 @@ function SignIn() {
       });
 
       if (response.status === 200) {
-        console.log("Signup successful!");
-        console.log("Signup response:", response.data);
-        localStorage.setItem("token", response.data.data.accessToken);
-        // updateAuthStatus(true);
+        localStorage.setItem("accessToken", response.data.data.accessToken);
         navigate("/roleselection");
       } else {
         console.error("Signup failed:", response.data.message);
@@ -157,7 +154,7 @@ function SignIn() {
                   <p className="text-neutral-500 mt-4">
                     Already have an account?
                     <Link
-                      to="/roleselection"
+                      to="/login"
                       className="text-blue-400 font-semibold text-lg ml-1 hover:underline cursor-pointer"
                     >
                       LogIn

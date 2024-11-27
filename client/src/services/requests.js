@@ -9,6 +9,8 @@ const request = {
   getEnrolledCourses: "/get-enrolled-courses",
   unenrollInCourse: "/unenroll",
   applyRole: "/apply-role",
+  logout: "/logout",
+  uploadVideo: "/upload-video",
   getUsers: `/getUsers`,
   otp: `/otp`,
 };

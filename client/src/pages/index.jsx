@@ -1,5 +1,5 @@
 export { default as Explore } from "./Explore";
-export { default as Courses } from "./Courses";
+export { default as MyCourses } from "./MyCourses";
 export { default as Calendar } from "./Calendar";
 export { default as LogIn } from "./auth/LogIn";
 export { default as SignIn } from "./auth/SigIn";
