@@ -66,12 +66,12 @@ function MyCourses() {
   };
 
   const handleFileChange = (event) => {
-    console.log("File: ", event.target.files[0]);
+    // console.log("File: ", event.target.files[0]);
     setSelectedFile(event.target.files[0]);
   };
 
   const handleFileUpload = async () => {
-    console.log("Uploading file to: ", request.uploadVideo);
+    // console.log("Uploading file to: ", request.uploadVideo);
     if (!selectedFile) {
       alert("Please select a file to upload.");
       return;

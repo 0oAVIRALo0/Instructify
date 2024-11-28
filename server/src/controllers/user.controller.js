@@ -287,10 +287,10 @@ const addCourse = asyncHandler(async (req, res) => {
   const validatedData = addCourseValidation.parse(req.body);
   const { title, description, price } = validatedData;
 
-  console.log("Request Body:", req.body);
+  // console.log("Request Body:", req.body);
 
   if ([title, description, price].some((field) => field?.trim() === "")) {
-    console.log("Missing fields");
+    // console.log("Missing fields");
     throw new errorHandler(400, "All fields are required");
   }
 

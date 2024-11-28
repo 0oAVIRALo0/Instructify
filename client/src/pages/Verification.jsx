@@ -13,7 +13,7 @@ const Verification = () => {
   };
 
   const handleSubmit = async () => {
-    console.log("Verifying code:", verificationCode);
+    // console.log("Verifying code:", verificationCode);
     try {
       const formData = new FormData();
       formData.append("verificationCode", verificationCode);
@@ -26,10 +26,10 @@ const Verification = () => {
         withCredentials: true,
       });
 
-      console.log("Verification response:", response);
+      // console.log("Verification response:", response);
 
       if (response.status === 200) {
-        console.log("Verification successful");
+        // console.log("Verification successful");
         navigate("/roleselection");
       }
     } catch (error) {

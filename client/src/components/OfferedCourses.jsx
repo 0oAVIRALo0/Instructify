@@ -26,7 +26,6 @@ function OfferedCourses() {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      console.log("Access token:", localStorage.getItem("accessToken"));
       try {
         const response = await axios.get(request.getAllCourses, {
           headers: {

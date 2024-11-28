@@ -35,7 +35,7 @@ const sendVerificationEmail = async (receiverEmail, verificationCode, fullName) 
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log("Verification email sent successfully");
+    // console.log("Verification email sent successfully");
   } catch (error) {
     console.error("Error sending verification email:", error);
   }
@@ -62,7 +62,7 @@ const welcomeEmail = async (receiverEmail, fullName) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log("Welcome email sent successfully");
+    // console.log("Welcome email sent successfully");
   } catch (error) {
     console.error("Error sending welcome email:", error);
   }

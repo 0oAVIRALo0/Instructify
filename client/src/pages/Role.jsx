@@ -26,7 +26,7 @@ const Role = () => {
       })
 
       if (response.status === 200) {
-        console.log("Role applied successfully!");
+        // console.log("Role applied successfully!");
         if (role === "student") {
           updateAuthStatus(true);
           navigate("/offeredcourses");

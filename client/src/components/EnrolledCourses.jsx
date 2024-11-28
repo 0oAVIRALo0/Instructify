@@ -51,7 +51,7 @@ function EnrolledCourses() {
       if (response.status === 200) {
         alert("Successfully unenrolled from the course!");
         setCourses(courses.filter((course) => course._id !== courseId));
-        console.log("Enrolled Courses:", courses);
+        // console.log("Enrolled Courses:", courses);
       }
     } catch (error) {
       console.error("Error unenrolling from course:", error);
@@ -84,7 +84,7 @@ function EnrolledCourses() {
 
   const handleWatchVideo = async () => {
     try {
-      const videoId = selectedCourse.videos[0]; // Assuming `videos` contains an array of video IDs
+      const videoId = selectedCourse.videos[0]; 
     
       const response = await axios.get(`${request.getVideo}/${videoId}`, {
         headers: {
