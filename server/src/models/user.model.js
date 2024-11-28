@@ -86,6 +86,13 @@ const userSchema = new Schema({
   lockUntil: {
     type: Date, 
   },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  verificationCode: {
+    type: String,
+  },
 }, { timestamps: true });
 
 userSchema.pre("save", async function (next) {

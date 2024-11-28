@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, uploadVideo, addCourse, getCourses,getAllCourses, enrollInCourse, getEnrolledCourses, unenrollInCourse, applyRole } from "../controllers/user.controller.js";
+import { registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, uploadVideo, addCourse, getCourses,getAllCourses, enrollInCourse, getEnrolledCourses, unenrollInCourse, applyRole, verifyUser } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/index.js";
 import { registerLimiter, loginLimiter, forgotPasswordLimiter } from "../middlewares/rate_limiter/auth.js";
 import { upload } from "../middlewares/index.js";
@@ -23,5 +23,6 @@ router.route('/get-all-courses').get(verifyJWT, getAllCourses);
 router.route('/enroll/:courseId').post(verifyJWT, enrollInCourse);
 router.route('/get-enrolled-courses').get(verifyJWT, getEnrolledCourses);
 router.route('/unenroll/:courseId').delete(verifyJWT, unenrollInCourse);
+router.route('/verify').post(verifyJWT, verifyUser);
 
 export default router;

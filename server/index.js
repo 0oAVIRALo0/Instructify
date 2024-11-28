@@ -1,9 +1,9 @@
-// Rate limiting
-// Schema Validation
+// Rate limiting - Done
+// Schema Validation - Done
 // Escaping HTML and CSS Protection
 // ORM and SQL Injection
 // Limiting the payload size
-// HTTP response headers using helmet
+// HTTP response headers using helmet - Done
 // Scaling Nodejs server
 
 import dotenv from 'dotenv';

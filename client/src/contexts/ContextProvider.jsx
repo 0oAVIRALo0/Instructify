@@ -18,8 +18,7 @@ export const ContextProvider = ({
   setUserData,
   isLoggedIn,
   setIsLoggedIn,
-}) => {
-  const [activeMenu, setActiveMenu] = useState(true);
+}) => {  const [activeMenu, setActiveMenu] = useState(true);
   const [isClicked, setIsClicked] = useState(initialState);
   const [screenSize, setScreenSize] = useState(undefined);
   const [currentColor, setCurrentColor] = useState("#03C9D7");
@@ -76,7 +75,7 @@ export const ContextProvider = ({
         withCredentials: true,
       })
 
-      console.log("Logout response:", response);
+      // console.log("Logout response:", response);
 
       if (response.status === 200) {
         console.log("Logged out successfull")

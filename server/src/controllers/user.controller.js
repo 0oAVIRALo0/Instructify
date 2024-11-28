@@ -1,11 +1,13 @@
-import { responseHandler, errorHandler, asyncHandler, generateTokens, options } from "../utils/index.js";
+import { responseHandler, errorHandler, asyncHandler, generateTokens, options, generateVerificationCode } from "../utils/index.js";
 import { User, Course, Video } from "../models/index.js";
 import jwt from "jsonwebtoken";
 import { registerUserValidation, loginUserValidation, addCourseValidation } from "../validation/index.js";
+import { sendVerificationEmail, welcomeEmail } from "../service/index.js";
 
 const registerUser = asyncHandler(async (req, res) => { 
   const validatedData = registerUserValidation.parse(req.body);
   const { fullName, email, username, password } = validatedData;
+  console.log("Request Body:", req.body);
 
   if (
     [fullName, email, username, password].some((field) => field?.trim() === "")
@@ -21,12 +23,17 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new errorHandler(409, "User with email or username already exists")
   }
 
+  const verificationCode = generateVerificationCode()
+
   const user = await User.create({
     fullName,
     email,
     username: username.toLowerCase(),
-    password
+    password,
+    verificationCode
   })
+
+  sendVerificationEmail(email, verificationCode, fullName)
 
   const { accessToken, refreshToken } = await generateTokens(user._id)
   
@@ -53,6 +60,33 @@ const registerUser = asyncHandler(async (req, res) => {
     )
   }
 );
+
+const verifyUser = asyncHandler(async (req, res) => { 
+  const { verificationCode } = req.body;
+
+  if (!verificationCode) {
+    throw new errorHandler(400, "Verification code is required");
+  }
+
+  const user = await User.findOne({
+    _id: req.user._id,
+  });
+
+  if (!user) {
+    throw new errorHandler(404, "User not found");
+  }
+
+  if (user.verificationCode !== verificationCode) {
+    throw new errorHandler(400, "Invalid verification code");
+  }
+
+  user.isVerified = true;
+  await user.save();
+
+  welcomeEmail(user.email, user.fullName);
+
+  return res.status(200).json(new responseHandler(200, {}, "User verified successfully"));
+});
 
 const loginUser = asyncHandler(async (req, res) => {
   const validatedData = loginUserValidation.parse(req.body)
@@ -401,5 +435,6 @@ export {
   enrollInCourse,
   getEnrolledCourses,
   unenrollInCourse,
-  applyRole
+  applyRole,
+  verifyUser
 }

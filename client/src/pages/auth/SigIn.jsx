@@ -55,7 +55,7 @@ function SignIn() {
 
       if (response.status === 200) {
         localStorage.setItem("accessToken", response.data.data.accessToken);
-        navigate("/roleselection");
+        navigate("/verification");
       } else {
         console.error("Signup failed:", response.data.message);
       }

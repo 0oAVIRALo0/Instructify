@@ -11,8 +11,9 @@ const request = {
   applyRole: "/apply-role",
   logout: "/logout",
   uploadVideo: "/upload-video",
-  getUsers: `/getUsers`,
-  otp: `/otp`,
+  verify: "/verify",
+  // getUsers: `/getUsers`,
+  // otp: `/otp`,
 };
 
 export default request;
