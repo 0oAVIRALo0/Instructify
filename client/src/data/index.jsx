@@ -35,6 +35,28 @@ export const links = [
             name: "My Courses",
             icon: <PersonSearchIcon />,
           },
+        ],
+      },
+    ],
+  },
+  {
+    title: "admin",
+    sections: [
+      {
+        title: "Dashboard",
+        links: [
+          {
+            name: "All Courses",
+            icon: <GroupsIcon />,
+          },
+          {
+            name: "All Instructors",
+            icon: <GroupsIcon />,
+          },
+          {
+            name: "All Students",
+            icon: <GroupsIcon />,
+          },
           {
             name: "Add Course",
             icon: <GroupsIcon />,
@@ -42,7 +64,7 @@ export const links = [
         ],
       },
     ],
-  },
+  }
 ];
 
 export const themeColors = [

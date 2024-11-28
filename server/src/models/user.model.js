@@ -27,7 +27,7 @@ const userSchema = new Schema({
   role: {
     type: String,
     lowercase: true,
-    enum: ["student", "instructor"],
+    enum: ["student", "instructor", "admin"],
     required: false,
   },
   avatar: {

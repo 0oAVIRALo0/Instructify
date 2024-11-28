@@ -44,8 +44,10 @@ function LogIn() {
         // Redirect based on the role
         if (response.data.data.user.role === "student") {
           navigate("/offeredcourses");
-        } else {
+        } else if (response.data.data.user.role === "instructor") {
           navigate("/mycourses");
+        } else if (response.data.data.user.role === "admin") {
+          navigate("/dashboard");
         }
       } else {
         console.error("Login Failed:", response.data.message);

@@ -6,7 +6,8 @@ import banner from '../data/banner.jpg';
 import Card from "./Card";
 
 function OfferedCourses() {
-  const [courses, setCourses] = useState([]);
+  const [allCourses, setAllCourses] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null); // Stores the selected course details
   const [loremText, setLoremText] = useState(""); // State for lorem ipsum text
@@ -35,7 +36,7 @@ function OfferedCourses() {
         });
 
         if (response.status === 200) {
-          setCourses(response.data.data);
+          setAllCourses(response.data.data);
         }
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -46,7 +47,6 @@ function OfferedCourses() {
   }, []);
 
   const enrollInCourse = async (courseId) => {
-    console.log("Enrolling in course:", courseId);
     try {
       const response = await axios.post(`${request.enrollInCourse}/${courseId}`,
         {},
@@ -62,6 +62,7 @@ function OfferedCourses() {
 
       if (response.status === 200) {
         alert("Successfully enrolled in the course!");
+        setEnrolledCourses([...enrolledCourses, response.data.data]);
       } 
     } catch (error) {
       if (error.response) {
@@ -72,7 +73,7 @@ function OfferedCourses() {
 
   const openModal = (course) => {
     setSelectedCourse(course);
-    setLoremText(lorem.generateParagraphs(1)); // Generate a random lorem ipsum paragraph
+    setLoremText(lorem.generateParagraphs(1)); 
     setIsModalOpen(true);
   };
 
@@ -94,13 +95,13 @@ function OfferedCourses() {
         <div className="flex justify-between items-center">
           <div>
             <p className="font-bold text-gray-500 text-xl">Total Courses Offered</p>
-            <p className="text-4xl">{courses.length}</p>
+            <p className="text-4xl">{allCourses.length}</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 m-3">
-        {courses.map((course) => (
+        {allCourses.map((course) => (
           <Card
             key={course._id}
             course={course}

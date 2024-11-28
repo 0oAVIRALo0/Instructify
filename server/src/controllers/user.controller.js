@@ -1,4 +1,7 @@
-import { responseHandler, errorHandler, asyncHandler, generateTokens, options, generateVerificationCode } from "../utils/index.js";
+import dotenv from "dotenv";
+dotenv.config();
+
+import { responseHandler, errorHandler, asyncHandler, generateTokens, options, generateVerificationCode, uploadOnCloudinary } from "../utils/index.js";
 import { User, Course, Video } from "../models/index.js";
 import jwt from "jsonwebtoken";
 import { registerUserValidation, loginUserValidation, addCourseValidation } from "../validation/index.js";
@@ -7,7 +10,6 @@ import { sendVerificationEmail, welcomeEmail } from "../service/index.js";
 const registerUser = asyncHandler(async (req, res) => { 
   const validatedData = registerUserValidation.parse(req.body);
   const { fullName, email, username, password } = validatedData;
-  console.log("Request Body:", req.body);
 
   if (
     [fullName, email, username, password].some((field) => field?.trim() === "")
@@ -21,6 +23,45 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (existingUser) {
     throw new errorHandler(409, "User with email or username already exists")
+  }
+
+  const existingAdmin = await User.findOne({ role: 'admin' });
+
+  if (!existingAdmin) { 
+    const admin = await User.create({
+      fullName: process.env.ADMIN_FULLNAME,
+      email: process.env.ADMIN_EMAIL,
+      username: process.env.ADMIN_USERNAME,
+      password: process.env.ADMIN_PASSWORD,
+      role: 'admin',
+      isVerified: true
+    });
+
+    const { accessToken, refreshToken } = await generateTokens(admin._id);
+
+    admin.refreshToken = refreshToken;
+
+    const createdAdmin = await User.findById(admin._id).select("-password -refreshToken");
+
+    if (!createdAdmin) {
+      throw new errorHandler(500, "Something went wrong while registering the admin");
+    }
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(
+        new responseHandler(
+          200,
+          {
+            user: createdAdmin,
+            accessToken,
+            refreshToken,
+          },
+          "Admin registered successfully"
+        )
+      );
   }
 
   const verificationCode = generateVerificationCode()
@@ -293,32 +334,35 @@ const getAllCourses = asyncHandler(async (req, res) => {
   return res.status(200).json(new responseHandler(200, courses, "Courses fetched successfully"));
 });
 
-const uploadVideo = asyncHandler(async (req, res) => { 
-  const { title, description } = req.body;
+const uploadVideo = asyncHandler(async (req, res) => {
+  const { title, description, courseId } = req.body;
+  const uploadedVideo = req.files?.video[0]?.path;
 
-  console.log("Request Body:", req.body); // Debugging the request payload
-  console.log("Uploaded File:", req.file); // Debugging uploaded file
-
-  if (!req.file) {
-    console.log("No file uploaded");
+  if (!uploadedVideo) {
     return res.status(400).json({ message: "No file uploaded" });
   }
 
   if ([title, description].some((field) => field?.trim() === "")) {
-    console.log("Missing fields");
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  // const videoUrl = req.file.path;
+  const videoUrl = await uploadOnCloudinary(uploadedVideo);
+
+  if (!videoUrl) {
+    return res.status(500).json({ message: "Failed to upload video to Cloudinary" });
+  }
+
+  // console.log("Video URL:", videoUrl);
 
   const video = await Video.create({
     title,
     description,
-    // videoUrl,
-    user: req.user._id,
+    url: videoUrl, 
+    instructor: req.user._id,
+    course: courseId,
   });
 
-  console.log("Video created:", video);
+  await Course.findByIdAndUpdate(courseId, { $push: { videos: video._id } });
 
   return res.status(201).json({
     status: 200,
@@ -350,7 +394,7 @@ const enrollInCourse = asyncHandler(async (req, res) => {
   await user.save();
 
   if (!course.studentsEnrolled.includes(user._id)) {
-    course.students.push(user._id);
+    course.studentsEnrolled.push(user._id);
     await course.save();
   }
 
@@ -396,14 +440,13 @@ const unenrollInCourse = asyncHandler(async (req, res) => {
 });
 
 const applyRole = asyncHandler(async (req, res) => {
-  console.log("Request Body:", req.body);
   const { role } = req.body;
 
   if (!role) {
     throw new errorHandler(400, "Role is required");
   }
 
-  const validRoles = ['student', 'instructor'];
+  const validRoles = ['student', 'instructor', 'admin'];
   if (!validRoles.includes(role.toLowerCase())) {
     throw new errorHandler(400, "Invalid role provided");
   }
@@ -418,6 +461,72 @@ const applyRole = asyncHandler(async (req, res) => {
   await fetchedUser.save();
 
   return res.status(200).json(new responseHandler(200, fetchedUser, "Role applied successfully"));
+});
+
+const getAllStudents = asyncHandler(async (req, res) => { 
+  const students = await User.find({ role: "student" });
+
+  return res.status(200).json(new responseHandler(200, students, "Students fetched successfully"));
+});
+
+const getAllInstructors = asyncHandler(async (req, res) => { 
+  const instructors = await User.find({ role: "instructor" });
+
+  return res.status(200).json(new responseHandler(200, instructors, "Instructors fetched successfully"));
+});
+
+const assignCourseToInstructor = asyncHandler(async (req, res) => { 
+  const { instructorId, courseId } = req.body;
+
+  if (!instructorId || !courseId) {
+    throw new errorHandler(400, "Instructor ID and Course ID are required");
+  }
+
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    throw new errorHandler(404, "Course not found");
+  }
+
+  const instructor = await User.findById(instructorId);
+
+  if (!instructor) {
+    throw new errorHandler(404, "Instructor not found");
+  }
+
+  await Course.findByIdAndUpdate(courseId, { instructor: instructorId });
+  await User.findByIdAndUpdate(instructorId, { $push: { coursesTaught: courseId } });
+
+  return res.status(200).json(new responseHandler(200, {}, "Course assigned to instructor successfully"));
+});
+
+const getAssignedCourses = asyncHandler(async (req, res) => { 
+  const user = await User.findById(req.user._id)
+
+  if (!user) {
+    throw new errorHandler(404, "User not found")
+  }
+
+  let assignedCourses = []
+  for (let courseId of user.coursesTaught) {
+    const course = await Course.findById(courseId)
+    assignedCourses.push({ instructorId: user._id, courseTitle: course.title })
+  }
+  console.log("Assigned courses:", assignedCourses);
+
+  return res.status(200).json(new responseHandler(200, assignedCourses, "Assigned courses fetched successfully"))
+});
+
+const getVideo = asyncHandler(async (req, res) => { 
+  const { videoId } = req.params;
+
+  const video = await Video.findById(videoId);
+
+  if (!video) {
+    throw new errorHandler(404, "Video not found");
+  }
+
+  return res.status(200).json(new responseHandler(200, video, "Video fetched successfully"));
 });
 
 export { 
@@ -436,5 +545,10 @@ export {
   getEnrolledCourses,
   unenrollInCourse,
   applyRole,
-  verifyUser
+  verifyUser,
+  getAllStudents,
+  getAllInstructors,
+  assignCourseToInstructor,
+  getAssignedCourses,
+  getVideo
 }

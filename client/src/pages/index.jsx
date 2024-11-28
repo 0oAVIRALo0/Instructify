@@ -6,3 +6,4 @@ export { default as SignIn } from "./auth/SigIn";
 export { default as Error } from "./Error404";
 export { default as Role } from "./Role";
 export { default as Verification } from "./Verification";
+export { default as Dashboard } from "./Dashboard";

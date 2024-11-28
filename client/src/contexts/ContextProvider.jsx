@@ -38,8 +38,8 @@ export const ContextProvider = ({
             withCredentials: true,
           });
           // console.log("User details:", response.data.data);
-          const { fullName, username, email, role } = response.data.data;
-          setUserData({ fullName, email, role, username });
+          const { _id, fullName, username, email, role } = response.data.data;
+          setUserData({ _id, fullName, email, role, username });
         }
       } catch (error) {
         console.error("Error fetching user details:", error);

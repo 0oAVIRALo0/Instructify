@@ -12,8 +12,11 @@ const request = {
   logout: "/logout",
   uploadVideo: "/upload-video",
   verify: "/verify",
-  // getUsers: `/getUsers`,
-  // otp: `/otp`,
+  getInstructors: "/get-all-instructors",
+  getStudents: "/get-all-students",
+  assignCourseToInstructor: "/assign-course-to-instructor",
+  getAssignedCourses: "/get-assigned-courses",
+  getVideo: "/get-video",
 };
 
 export default request;

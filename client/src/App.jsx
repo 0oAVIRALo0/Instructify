@@ -4,8 +4,8 @@ import { Routes, Route, Navigate } from "react-router-dom"; // Import Navigate f
 import LinearProgress from "@mui/material/LinearProgress";
 import { FiSettings } from "react-icons/fi";
 
-import { Navbar, Sidebar, ThemeSettings, AddCourse, OfferedCourses, EnrolledCourses } from "./components";
-import { Explore, MyCourses, Calendar, LogIn, SignIn, Error, Role, Verification } from "./pages";
+import { Navbar, Sidebar, ThemeSettings, AddCourse, OfferedCourses, EnrolledCourses, AllCourses, AllInstructors, AllStudents } from "./components";
+import { Explore, MyCourses, Calendar, LogIn, SignIn, Error, Role, Verification, Dashboard } from "./pages";
 
 import { useStateContext } from "./contexts/ContextProvider";
 
@@ -86,6 +86,10 @@ const App = () => {
               <Route path="/offeredcourses" element={<OfferedCourses />} />
               <Route path="/enrolledcourses" element={<EnrolledCourses />} />
               <Route path="/calendar" element={<Calendar />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/allcourses" element={<AllCourses />} />
+              <Route path="/allinstructors" element={<AllInstructors />} />
+              <Route path="/allstudents" element={<AllStudents />} />
 
               {/* Fallback Error Page */}
               <Route path="*" element={<Error />} />

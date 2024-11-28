@@ -16,7 +16,9 @@ const loginUserValidation = z.object({
 const addCourseValidation = z.object({
   title: z.string().min(1, "Title is required").trim(), 
   description: z.string().min(1, "Description is required").trim(), 
-  price: z.number().positive("Price must be a positive number").min(0, "Price must be at least 0"), 
+  price: z.string(), 
 });
 
 export { registerUserValidation, loginUserValidation, addCourseValidation };
+
+// .positive("Price must be a positive number").min(0, "Price must be at least 0")

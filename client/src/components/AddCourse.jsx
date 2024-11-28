@@ -35,8 +35,8 @@ function NewCourse() {
         withCredentials: true,
       });
 
-      if (response.status === 2001) {
-        alert("Meeting request created successfully");
+      if (response.status === 201) {
+        alert("Course added successfully!");
         // console.log("Response:", response.data);
         setCourseTitle("");
         setCourseDescription("");
