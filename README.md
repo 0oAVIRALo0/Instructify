@@ -70,6 +70,7 @@ The application uses **MongoDB** as the database, with 3 primary schemas:
 - **Course Schema**: Stores details about each course like course name, instructor(s), video lectures, and student enrollments.
 
 ### Security Features
+- **2FA**: Email verification for user identity.
 - **Rate Limiting**: Using rate-limiting middleware to prevent brute force attacks, DoS (Denial of Service), and DDoS (Distributed Denial of Service) attacks.
 - **Schema Validation**: Data is validated using [Zod](https://github.com/colinhacks/zod), ensuring that all incoming data adheres to the required structure.
 - **HTTP Headers**: [Helmet](https://github.com/helmetjs/helmet) is used to set various HTTP headers for security, such as preventing XSS (Cross-site Scripting) attacks and defining a Content Security Policy (CSP).
