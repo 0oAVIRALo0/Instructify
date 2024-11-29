@@ -1,0 +1,13 @@
+export { default as Button } from './Button';
+export { default as ThemeSettings } from './ThemeSettings';
+export { default as Sidebar } from './Sidebar';
+export { default as Navbar } from './Navbar';
+export { default as UserProfile } from './UserProfile';
+export { default as Header } from './Header';
+export { default as AddCourse } from "./AddCourse";
+export { default as OfferedCourses } from "./OfferedCourses";
+export { default as EnrolledCourses } from "./EnrolledCourses";
+export { default as Card } from "./Card";
+export { default as AllCourses } from "./AllCourses";
+export { default as AllInstructors } from "./AllInstructors";
+export { default as AllStudents } from "./AllStudents";
