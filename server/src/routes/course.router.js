@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
-  addCourse,
-  getCourses,
+  createCourse,
+  getCourse,
   getAllCourses,
   getAssignedCourses,
   unenrollInCourse,
@@ -13,8 +13,8 @@ import { verifyJWT } from "../middlewares/index.js";
 const router = Router();
 
 router.route("/get-all-courses").get(verifyJWT, getAllCourses);
-router.route("/add-course").post(verifyJWT, addCourse);
-router.route("/get-courses").get(verifyJWT, getCourses);
+router.route("/add-course").post(verifyJWT, createCourse);
+router.route("/get-course").get(verifyJWT, getCourse);
 router.route("/get-assigned-courses").get(verifyJWT, getAssignedCourses);
 router.route("/unenroll/:courseId").delete(verifyJWT, unenrollInCourse);
 router.route("/enroll/:courseId").post(verifyJWT, enrollInCourse);

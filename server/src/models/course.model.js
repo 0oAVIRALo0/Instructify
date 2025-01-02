@@ -12,9 +12,14 @@ const courseSchema = new Schema({
     required: true,
     trim: true,
   },
-  price: {
+  numOfLectures: {
     type: Number,
-    required: true,
+  },
+  numOfAssignments: {
+    type: Number,
+  },
+  credits: {
+    type: Number
   },
   instructor: {
     type: mongoose.Schema.Types.ObjectId,

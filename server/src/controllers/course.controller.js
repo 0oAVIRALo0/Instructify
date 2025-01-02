@@ -5,7 +5,7 @@ import { responseHandler, errorHandler, asyncHandler } from "../utils/index.js";
 import { User, Course, Video } from "../models/index.js";
 import { addCourseValidation } from "../validation/index.js";
 
-const addCourse = asyncHandler(async (req, res) => {
+const createCourse = asyncHandler(async (req, res) => {
   const validatedData = addCourseValidation.parse(req.body);
   const { title, description, price } = validatedData;
 
@@ -36,7 +36,7 @@ const addCourse = asyncHandler(async (req, res) => {
     .json(new responseHandler(200, course, "Course created successfully"));
 });
 
-const getCourses = asyncHandler(async (req, res) => {
+const getCourse = asyncHandler(async (req, res) => {
   const courses = await Course.find({
     instructor: req.user._id,
   });
@@ -168,8 +168,8 @@ const getEnrolledCourses = asyncHandler(async (req, res) => {
 });
 
 export {
-  addCourse,
-  getCourses,
+  createCourse,
+  getCourse,
   getAllCourses,
   getAssignedCourses,
   unenrollInCourse,
